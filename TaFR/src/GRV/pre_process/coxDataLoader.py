@@ -32,8 +32,8 @@ class coxDataLoader:
 
     def __init__(self, args):
         dataFolder=args.path+args.dataset
-        self.coxData=pd.read_csv("../../../data/MINDsmall_train/behaviors.tsv")
-        # self.coxData=pd.read_csv("TaFR/src/GRV/pre_process/coxDataLoader.py")
+        # self.coxData=pd.read_csv("../../../data/MINDsmall_train/behaviors.tsv")
+        self.coxData=pd.read_csv("TaFR/src/GRV/pre_process/coxDataLoader.py")
 
         renameDict={'item_id':'photo_id'}
         for i in range(168):
@@ -142,7 +142,7 @@ if __name__ == '__main__':
     parser = coxDataLoader.parse_data_args(parser)
     args, extras = parser.parse_known_args()
 
-    # args.path = '../../data/'
+    args.path = '../../data/MIND/MINDsmall_train'
     corpus = coxDataLoader(args)
     # label=Label(corpus)
     # corpus.preprocess()
