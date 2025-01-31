@@ -32,23 +32,22 @@ class coxDataLoader:
 
     def __init__(self, args):
         dataFolder = os.path.join(args.path, args.dataset)
-        if args.dataset == "MIND":
-            # Load preprocessed MIND dataset
-            self.coxData = pd.read_csv(os.path.join(dataFolder, "preprocessed", "MIND_preprocessed.csv"), sep=args.sep)
+        
+        # Load preprocessed data for MIND or MIND-small
+        if args.dataset.lower() in ["mind", "mind-small"]:
+            preprocessed_path = os.path.join(dataFolder, "preprocessed", f"{args.dataset}_preprocessed.csv")
+            self.coxData = pd.read_csv(preprocessed_path, sep=args.sep)
         elif args.dataset == "kwai":
             self.coxData = pd.read_csv(os.path.join(dataFolder, "kwai_1115.csv"), sep=args.sep)
         else:
-            raise ValueError("Unsupported dataset")
+            raise ValueError(f"Unsupported dataset: {args.dataset}")
 
-        # Rename columns to match expected format
-        renameDict = {
-            'news_id': 'photo_id',
-            'click_rate': 'click_rate'
-        }
+        # Rename columns for consistency
+        renameDict = {'news_id': 'photo_id', 'clicked': 'click_rate'}
         for i in range(168):
             renameDict[f'ctr{i}'] = f'click_rate{i}'
         self.coxData.rename(columns=renameDict, inplace=True)
-        print(f"Loaded dataset with columns: {self.coxData.columns}")
+        print(f"Loaded dataset: {args.dataset}, shape: {self.coxData.shape}")
 
     def filtered_data(self):
         caredList=['photo_id']

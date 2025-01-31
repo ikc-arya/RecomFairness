@@ -69,24 +69,16 @@ class Label:
         df = df[df['timelevel'] < self.end_time].copy()
         return df
 
-    def prepareDied(self,args,corpus):
-        # self.hourData=self.read_all(args)
-        # self.coxData=pd.read_csv("%s/cox.csv"%self.dataFolder)
-        # self.hourData=self.read_all(args)
-        hourInfo=self.read_all(args) #corpus.hourData
-        print(corpus.play_rate,corpus.pctr)
-        # click_rate, play_rate, pctr
-        second_label='play_rate'
-        if second_label not in hourInfo.columns.tolist():
-            second_label='exposure'
-        def getRank(g):
-            return pd.DataFrame((1 + np.lexsort((g[second_label].rank(), \
-            g['click_rate'].rank())))/len(g), \
-            index=g.index)
-        # print(hourInfo.columns)
-        hourInfo=hourInfo.sample(frac=1)
-        hourInfo['riskRank']=hourInfo.groupby(['timelevel']).apply(getRank)
-        print(hourInfo['riskRank'].describe())
+    def prepareDied(self, args, corpus):
+        # Identify new items (20% latest uploads in MIND)
+        if args.dataset.lower() == "mind":
+            new_item_threshold = corpus.coxData["timestamp"].quantile(0.8)
+            new_items = corpus.coxData[corpus.coxData["timestamp"] > new_item_threshold]["photo_id"].unique()
+        elif args.dataset.lower() == "mind-small":
+            new_items = corpus.coxData.sample(frac=0.2)["photo_id"].unique()
+        
+        # Track exposed new items
+        exposed_new_items = all_predictions[all_predictions["itemID"].isin(new_items)]["itemID"].nunique()
 
         def getFlag(v,t):
             if t<corpus.start_time:
