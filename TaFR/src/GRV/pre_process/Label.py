@@ -50,35 +50,23 @@ class Label:
             self.prepareDied(args,corpus)
         # else:
         #     self.prepareDied(corpus)
-
         return
     
-    def read_all(self,args):
-        dataFolder=args.path+args.dataset
-        df=pd.DataFrame()
-        if args.dataset=='kwai':
-            df=pd.read_csv('%s/%s_10F_167H_hourLog.csv'%(dataFolder,args.dataset[5:]))
-            df.rename({"expose_hour":'timelevel','is_click':'click_rate','new_pctr':'pctr'},axis=1,inplace=True)
-        elif args.dataset=='MIND':
-            df=pd.read_csv('%s/itemHourLog.csv'%(dataFolder))
-            df.rename({"item_id":'photo_id','is_click':'click_rate','new_pctr':'pctr'},axis=1,inplace=True)
+    def read_all(self, args):
+        dataFolder = os.path.join(args.path, args.dataset)
+        if args.dataset == "MIND":
+            # Load preprocessed MIND data
+            df = pd.read_csv(os.path.join(dataFolder, "preprocessed", "MIND_preprocessed.csv"))
+            df.rename(columns={"photo_id": "item_id", "click_rate": "is_click"}, inplace=True)
+            df["new_pctr"] = df["pctr"]  # Use historical CTR as pCTR
+        elif args.dataset == "kwai":
+            df = pd.read_csv(f"{dataFolder}/{args.dataset}_10F_167H_hourLog.csv")
+            df.rename({"expose_hour": 'timelevel', 'is_click': 'click_rate', 'new_pctr': 'pctr'}, axis=1, inplace=True)
         else:
-            for i in range(10):
-                if args.exposed_duration:
-                    tmp=pd.read_csv("%s/%s_%dsystem_itemHour_log.csv"%(dataFolder,args.dataset[5:],i))
-                else:
-                    tmp=pd.read_csv("%s/%s_%dsystem_itemHour_log.csv"%(dataFolder,args.dataset[5:],i))
-                print('[loader]',i)
-                # print(tmp.columns.tolist())
-                df=pd.concat([df,tmp],ignore_index=True)
-        # df.reset_index(inplace=True)
-        print(df.columns.tolist())
-        if self.exposed_duration:
-            df.rename({'timelevel':'timelevel_old','timelevel_exposed':'timelevel'},axis=1,inplace=True)
-        print(df.columns.tolist())
-        df=df[df['timelevel']<self.end_time].copy()
-        if 'play_time' in df.columns.tolist():
-            df['play_rate']=df['play_time']/df['photo_time']
+            raise ValueError("Unsupported dataset")
+        
+        # Filter data by timelevel
+        df = df[df['timelevel'] < self.end_time].copy()
         return df
 
     def prepareDied(self,args,corpus):

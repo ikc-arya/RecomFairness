@@ -6,8 +6,8 @@ Jiayin Wang, Weizhi Ma, Chumeng Jiang, Min Zhang, Yuan Zhang, Biao Li and Peng J
 
 Currently under constructions.
 
-
 ## Reference
+
 ```
 @inproceedings{DBLP:conf/SIGIR/WangMJZYLJ23,
   author    = {Jiayin Wang and

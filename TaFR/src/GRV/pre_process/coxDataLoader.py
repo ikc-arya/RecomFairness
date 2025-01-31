@@ -12,11 +12,11 @@ import os
 
 class coxDataLoader:
     def parse_data_args(parser):
-        parser.add_argument('--path', type=str, default='../data/',
+        parser.add_argument('--path', type=str, default='../../../data/',
                             help='Input data dir.')
-        parser.add_argument('--dataset', type=str, default='kwai_1115',
+        parser.add_argument('--dataset', type=str, default='MIND',
                             help='Choose a dataset.')
-        parser.add_argument('--prediction_dataset', type=str, default='',
+        parser.add_argument('--prediction_dataset', type=str, default='MIND',
                             help='Choose a dataset.')
         parser.add_argument('--sep', type=str, default='\t',
                             help='sep of csv file.')
@@ -31,25 +31,24 @@ class coxDataLoader:
 
 
     def __init__(self, args):
-        dataFolder=args.path+args.dataset
-        # self.coxData=pd.read_csv("../../../data/MINDsmall_train/behaviors.tsv")
-        self.coxData=pd.read_csv("TaFR/src/GRV/pre_process/coxDataLoader.py")
+        dataFolder = os.path.join(args.path, args.dataset)
+        if args.dataset == "MIND":
+            # Load preprocessed MIND dataset
+            self.coxData = pd.read_csv(os.path.join(dataFolder, "preprocessed", "MIND_preprocessed.csv"), sep=args.sep)
+        elif args.dataset == "kwai":
+            self.coxData = pd.read_csv(os.path.join(dataFolder, "kwai_1115.csv"), sep=args.sep)
+        else:
+            raise ValueError("Unsupported dataset")
 
-        renameDict={'item_id':'photo_id'}
+        # Rename columns to match expected format
+        renameDict = {
+            'news_id': 'photo_id',
+            'click_rate': 'click_rate'
+        }
         for i in range(168):
-            renameDict['ctr%d'%i]='click_rate%d'%i
-            renameDict['exp%d'%i]='exposure%d'%i
-        self.coxData.rename(renameDict,inplace=True,axis=1)
-
-
-        # self.filtered_data()
-        print(len(self.coxData),self.coxData.columns)
-        self.labtrans=None
-        self.play_rate=args.play_rate
-        self.pctr=args.pctr
-        self.start_time=args.start_time
-        self.prediction_dataset=args.prediction_dataset
-        return
+            renameDict[f'ctr{i}'] = f'click_rate{i}'
+        self.coxData.rename(columns=renameDict, inplace=True)
+        print(f"Loaded dataset with columns: {self.coxData.columns}")
 
     def filtered_data(self):
         caredList=['photo_id']
@@ -142,7 +141,7 @@ if __name__ == '__main__':
     parser = coxDataLoader.parse_data_args(parser)
     args, extras = parser.parse_known_args()
 
-    args.path = '../../data/MIND/MINDsmall_train'
+    # args.path = '../../data/'
     corpus = coxDataLoader(args)
     # label=Label(corpus)
     # corpus.preprocess()

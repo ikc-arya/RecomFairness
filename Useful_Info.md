@@ -20,3 +20,28 @@
 2. NDCG@k - Normalised Discounted Cumulative Gain
 3. N_Cov@k - (New) Item Coverage (time-sensitive exposure fairness)
 4. Cov@k - coverage
+
+# Steps to run the code:
+
+Clone the original repo:
+
+```
+git clone https://github.com/Alice1998/TaFR.git
+cd TaFR
+```
+
+Create the environment:
+
+```
+python -m venv tafr_env
+source tafr_env/bin/activate  
+# On Windows: tafr_env\Scripts\activate
+```
+
+Install dependencies
+
+> Note: the current(latest) version of any library works (no specific requirements)
+
+```
+pip install -r requirements.txt
+```
