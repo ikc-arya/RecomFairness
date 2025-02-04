@@ -31,23 +31,29 @@ class coxDataLoader:
 
 
     def __init__(self, args):
+        # Load preprocessed data
         dataFolder = os.path.join(args.path, args.dataset)
-        
-        # Load preprocessed data for MIND or MIND-small
-        if args.dataset.lower() in ["mind", "mind-small"]:
-            preprocessed_path = os.path.join(dataFolder, "preprocessed", f"{args.dataset}_preprocessed.csv")
-            self.coxData = pd.read_csv(preprocessed_path, sep=args.sep)
-        elif args.dataset == "kwai":
-            self.coxData = pd.read_csv(os.path.join(dataFolder, "kwai_1115.csv"), sep=args.sep)
+        if args.dataset.lower() == "mind-small":
+            preprocessed_file = "MIND-small_train.csv"
+        elif args.dataset.lower() == "mind":
+            preprocessed_file = "MIND_train.csv"
         else:
             raise ValueError(f"Unsupported dataset: {args.dataset}")
+        
+        preprocessed_path = os.path.join(args.path, "MIND", "preprocessed", preprocessed_file)
+        if not os.path.exists(preprocessed_path):
+            raise FileNotFoundError(f"Preprocessed file not found: {preprocessed_path}")
+        
+        # Load the CSV file with proper parsing
+        self.coxData = pd.read_csv(preprocessed_path, sep=",", quotechar='"', escapechar="\\")
+        print(f"Loaded dataset: {args.dataset}, shape: {self.coxData.shape}")
 
         # Rename columns for consistency
         renameDict = {'news_id': 'photo_id', 'clicked': 'click_rate'}
         for i in range(168):
             renameDict[f'ctr{i}'] = f'click_rate{i}'
         self.coxData.rename(columns=renameDict, inplace=True)
-        print(f"Loaded dataset: {args.dataset}, shape: {self.coxData.shape}")
+        print(f"Renamed columns: {self.coxData.columns.tolist()}")  # Print column names as a list
 
     def filtered_data(self):
         caredList=['photo_id']
