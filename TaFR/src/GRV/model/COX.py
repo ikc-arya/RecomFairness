@@ -1,11 +1,15 @@
+import sys
+import os
 from tokenize import group
+
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(parent_dir)
 from pre_process import coxDataLoader
 import logging
 
 
 import torch
 from utils import utils
-import os
 
 from pycox.models import CoxTime
 from pycox.models.cox_time import MLPVanillaCoxTime

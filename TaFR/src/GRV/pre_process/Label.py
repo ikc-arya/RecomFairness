@@ -1,4 +1,10 @@
 # -*- coding: UTF-8 -*-
+import sys
+import os
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(parent_dir)
+
+from pre_process import coxDataLoader
 import logging
 import argparse
 import pandas as pd
@@ -76,6 +82,8 @@ class Label:
             new_items = corpus.coxData[corpus.coxData["timestamp"] > new_item_threshold]["photo_id"].unique()
         elif args.dataset.lower() == "mind-small":
             new_items = corpus.coxData.sample(frac=0.2)["photo_id"].unique()
+            print(corpus.coxData.columns)
+            print(corpus.coxData.sample(frac=0.2).head())
         
         # Track exposed new items
         exposed_new_items = all_predictions[all_predictions["itemID"].isin(new_items)]["itemID"].nunique()

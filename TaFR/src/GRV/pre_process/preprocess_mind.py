@@ -61,25 +61,23 @@ def preprocess_mind(mind_path, output_path, dataset_name="MIND-small"):
     print(f"Preprocessing complete! Files saved to {output_path}")
 
 def _merge_and_save(behaviors, news, output_file):
-    # Explode impressions and inspect
+    # Explode impressions into individual rows
     behaviors = behaviors.explode("impressions").reset_index(drop=True)
-    print("Sample impressions after explode:")
-    print(behaviors["impressions"].head(10))
-
-    # Check for malformed entries
-    malformed = behaviors[~behaviors["impressions"].str.contains("-", na=False)]
-    if not malformed.empty:
-        print(f"Found {len(malformed)} malformed impressions:")
-        print(malformed["impressions"].head())
-
-    # Filter out malformed entries
-    behaviors = behaviors[behaviors["impressions"].str.contains("-", na=False)]
-
-    # Split into photo_id and clicked
-    split_impressions = behaviors["impressions"].str.split("-", expand=True)
-    behaviors["photo_id"] = split_impressions[0]
-    behaviors["clicked"] = split_impressions[1].astype(int)
-
+    
+    # Clean impressions: Remove quotes, commas, and other non-alphanumeric characters
+    behaviors["impressions"] = behaviors["impressions"].str.replace(r'[^a-zA-Z0-9-]', '', regex=True)
+    
+    # Split into photo_id (item) and clicked (label)
+    split_impressions = behaviors["impressions"].str.extract(r'([A-Za-z]*)(\d+)-(\d+)')
+    behaviors["photo_id"] = split_impressions[1].astype(int)  # Extract numeric part (e.g., 20678 from N20678)
+    behaviors["clicked"] = split_impressions[2].astype(int)   # Extract numeric label (0 or 1)
+    
+    # Clean user_id (remove "U" prefix)
+    behaviors["user_id"] = behaviors["user_id"].str.replace(r'[^0-9]', '', regex=True).astype(int)
+    
+    # Convert news_id to int64 for merging
+    news["news_id"] = news["news_id"].astype(str).str.replace(r'[^0-9]', '', regex=True).astype(int)
+    
     # Merge with news data
     df = pd.merge(behaviors, news, left_on="photo_id", right_on="news_id", how="left")
     

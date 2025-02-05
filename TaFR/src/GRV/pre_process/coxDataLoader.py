@@ -12,11 +12,11 @@ import os
 
 class coxDataLoader:
     def parse_data_args(parser):
-        parser.add_argument('--path', type=str, default='../../../data/',
+        parser.add_argument('--path', type=str, default='TaFR/data/',
                             help='Input data dir.')
-        parser.add_argument('--dataset', type=str, default='MIND',
+        parser.add_argument('--dataset', type=str, default='MIND-small',
                             help='Choose a dataset.')
-        parser.add_argument('--prediction_dataset', type=str, default='MIND',
+        parser.add_argument('--prediction_dataset', type=str, default='MIND-small',
                             help='Choose a dataset.')
         parser.add_argument('--sep', type=str, default='\t',
                             help='sep of csv file.')
@@ -31,6 +31,7 @@ class coxDataLoader:
 
 
     def __init__(self, args):
+        self.start_time = args.start_time
         # Load preprocessed data
         dataFolder = os.path.join(args.path, args.dataset)
         if args.dataset.lower() == "mind-small":
